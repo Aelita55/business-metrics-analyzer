@@ -1,0 +1,67 @@
+@startuml
+!theme plain
+title Business Metrics Analyzer — Компоненты (слоистая архитектура)
+
+package "Presentation (API)" {
+  [AuthController]
+  [SalesController]
+  [KpiController]
+  [ReportsController]
+}
+
+package "Application (Service Layer)" {
+  [AuthService]
+  [SalesImportService]
+  [KpiService]
+  [ReportService]
+  [UserService]
+}
+
+package "Domain" {
+  [Sale]
+  [Kpi]
+  [User]
+  [Report]
+  [KpiStrategy]
+  [Validators]
+}
+
+package "Infrastructure" {
+  [SqlSaleRepository]
+  [SqlUserRepository]
+  [UnitOfWork]
+  [JwtProvider]
+  [ExcelReportGenerator]
+  [EmailNotifier]
+}
+
+database "PostgreSQL" as DB
+cloud "Внешние сервисы" as EXT
+
+[AuthController] --> [AuthService]
+[SalesController] --> [SalesImportService]
+[KpiController] --> [KpiService]
+[ReportsController] --> [ReportService]
+
+[AuthService] --> [JwtProvider]
+[AuthService] --> [UserService]
+[UserService] --> [SqlUserRepository]
+
+[SalesImportService] --> [UnitOfWork]
+[SalesImportService] --> [SqlSaleRepository]
+[SalesImportService] --> [Validators]
+
+[KpiService] --> [KpiStrategy]
+[KpiService] --> [UnitOfWork]
+[KpiService] --> [SqlSaleRepository]
+
+[ReportService] --> [ExcelReportGenerator]
+[ReportService] --> [EmailNotifier]
+[ReportService] --> [UnitOfWork]
+
+[SqlSaleRepository] --> DB
+[SqlUserRepository] --> DB
+[ExcelReportGenerator] --> EXT
+[EmailNotifier] --> EXT
+
+@enduml

@@ -1,0 +1,49 @@
+@startuml
+!theme plain
+title Business Metrics Analyzer — Развёртывание (Docker / Cloud)
+
+node "Клиентское устройство" {
+  [Браузер]
+}
+
+node "Облачная инфраструктура (Docker)" {
+
+  node "Веб-сервер" {
+    [Nginx]
+  }
+
+  node "Сервер приложений" {
+    [FastAPI / Uvicorn]
+    [Сервис импорта]
+    [Сервис KPI]
+    [Сервис отчётов]
+  }
+
+  database "PostgreSQL" as DB {
+    [postgres:16]
+  }
+
+  database "Redis" as CACHE {
+    [redis:7-alpine]
+  }
+
+  storage "MinIO / S3" as STORAGE {
+    [minio/minio]
+  }
+
+}
+
+cloud "Внешние сервисы" {
+  [SMTP]
+  [Источник данных 1C/CSV]
+}
+
+[Браузер] --> [Nginx] : HTTPS
+[Nginx] --> [FastAPI / Uvicorn] : HTTP
+[FastAPI / Uvicorn] --> DB : SQL
+[FastAPI / Uvicorn] --> CACHE : Redis protocol
+[Сервис отчётов] --> STORAGE : S3 API
+[Сервис отчётов] --> [SMTP] : SMTP
+[Сервис импорта] --> [Источник данных 1C/CSV] : HTTPS/FTP
+
+@enduml
