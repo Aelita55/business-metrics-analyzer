@@ -1,0 +1,43 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+Person(director, "Коммерческий директор", "Просматривает KPI и отчёты")
+Person(manager, "Менеджер по продажам", "Работает с данными продаж")
+Person(analyst, "Аналитик", "Формирует и экспортирует отчёты")
+Person(admin, "Администратор", "Управляет пользователями и метриками")
+
+System_Boundary(bma, "Business Metrics Analyzer") {
+    Container(web, "Web UI", "HTML/JS/Vue/React", "Интерфейс пользователя, дашборды")
+    Container(api, "REST API", "Python, FastAPI", "Основной API приложения, оркестрация запросов")
+    Container(auth, "Сервис аутентификации", "Python, JWT", "Выдача и проверка токенов доступа")
+    Container(importer, "Сервис импорта", "Python, pandas", "Асинхронный импорт и валидация данных")
+    Container(kpi, "Сервис KPI", "Python", "Расчёт бизнес-метрик")
+    Container(reports, "Сервис отчётов", "Python, openpyxl", "Формирование и экспорт отчётов в Excel/PDF")
+    
+    ContainerDb(db, "База данных", "PostgreSQL", "Хранение данных о продажах, пользователях и KPI")
+    ContainerDb(cache, "Кэш", "Redis", "Кэширование результатов расчёта KPI для ускорения отклика")
+    ContainerDb(storage, "Файловое хранилище", "S3/MinIO", "Хранение сгенерированных файлов отчётов")
+}
+
+System_Ext(source, "Источник данных", "1С / CSV / Excel", "Поставка данных о продажах")
+System_Ext(email, "Сервис уведомлений", "SMTP", "Отправка уведомлений")
+
+Rel(director, web, "Использует", "HTTPS")
+Rel(manager, web, "Использует", "HTTPS")
+Rel(analyst, web, "Использует", "HTTPS")
+Rel(admin, web, "Использует", "HTTPS")
+
+Rel(web, api, "Запросы данных", "REST/JSON")
+Rel(api, auth, "Проверка токена", "Внутренний вызов")
+Rel(api, importer, "Инициирует импорт", "Внутренний вызов")
+Rel(api, kpi, "Запрашивает расчёт KPI", "Внутренний вызов")
+Rel(api, reports, "Запрашивает формирование отчёта", "Внутренний вызов")
+
+Rel(importer, db, "Запись сырых данных", "SQL")
+Rel(kpi, db, "Чтение данных для расчёта", "SQL")
+Rel(kpi, cache, "Чтение/запись кэша", "Redis protocol")
+Rel(reports, storage, "Сохранение файлов", "S3 API")
+Rel(reports, email, "Отправка уведомления о готовности", "SMTP")
+Rel(source, importer, "Передача данных", "HTTPS/FTP")
+
+@enduml
