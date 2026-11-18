@@ -1,35 +1,49 @@
 @startuml
+!theme plain
+title Business Metrics Analyzer — Развёртывание (Docker / Cloud)
+
 node "Клиентское устройство" {
-    [Браузер]
+  [Браузер]
 }
 
 node "Облачная инфраструктура (Docker)" {
-    node "Веб-сервер" {
-        [Nginx]
-    }
-    
-    node "Сервер приложений" {
-        [FastAPI / Uvicorn]
-        [Сервис импорта (Worker)]
-        [Сервис KPI]
-        [Сервис отчётов]
-    }
-    
-    database "PostgreSQL" as DB
-    database "Redis" as CACHE
-    storage "MinIO / S3" as STORAGE
+
+  node "Веб-сервер" {
+    [Nginx]
+  }
+
+  node "Сервер приложений" {
+    [FastAPI / Uvicorn]
+    [Сервис импорта]
+    [Сервис KPI]
+    [Сервис отчётов]
+  }
+
+  database "PostgreSQL" as DB {
+    [postgres:16]
+  }
+
+  database "Redis" as CACHE {
+    [redis:7-alpine]
+  }
+
+  storage "MinIO / S3" as STORAGE {
+    [minio/minio]
+  }
+
 }
 
 cloud "Внешние сервисы" {
-    [SMTP Сервер]
-    [Источник данных 1С/CSV]
+  [SMTP]
+  [Источник данных 1C/CSV]
 }
 
 [Браузер] --> [Nginx] : HTTPS
-[Nginx] --> [FastAPI / Uvicorn] : HTTP (Reverse Proxy)
-[FastAPI / Uvicorn] --> DB : SQL (5432)
-[FastAPI / Uvicorn] --> CACHE : Redis protocol (6379)
-[Сервис отчётов] --> STORAGE : S3 API (9000)
-[Сервис отчётов] --> [SMTP Сервер] : SMTP (587)
-[Сервис импорта (Worker)] --> [Источник данных 1С/CSV] : HTTPS / FTP
+[Nginx] --> [FastAPI / Uvicorn] : HTTP
+[FastAPI / Uvicorn] --> DB : SQL
+[FastAPI / Uvicorn] --> CACHE : Redis protocol
+[Сервис отчётов] --> STORAGE : S3 API
+[Сервис отчётов] --> [SMTP] : SMTP
+[Сервис импорта] --> [Источник данных 1C/CSV] : HTTPS/FTP
+
 @enduml

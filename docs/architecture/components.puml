@@ -1,34 +1,38 @@
 @startuml
+!theme plain
+title Business Metrics Analyzer — Компоненты (слоистая архитектура)
+
 package "Presentation (API)" {
-    [AuthController]
-    [SalesController]
-    [KpiController]
-    [ReportsController]
+  [AuthController]
+  [SalesController]
+  [KpiController]
+  [ReportsController]
 }
 
 package "Application (Service Layer)" {
-    [AuthService]
-    [SalesImportService]
-    [KpiService]
-    [ReportService]
-    [UserService]
+  [AuthService]
+  [SalesImportService]
+  [KpiService]
+  [ReportService]
+  [UserService]
 }
 
 package "Domain" {
-    [Sale]
-    [Kpi]
-    [User]
-    [KpiStrategy]
-    [Validators]
+  [Sale]
+  [Kpi]
+  [User]
+  [Report]
+  [KpiStrategy]
+  [Validators]
 }
 
 package "Infrastructure" {
-    [SqlSaleRepository]
-    [SqlUserRepository]
-    [UnitOfWork]
-    [JwtProvider]
-    [ExcelReportGenerator]
-    [EmailNotifier]
+  [SqlSaleRepository]
+  [SqlUserRepository]
+  [UnitOfWork]
+  [JwtProvider]
+  [ExcelReportGenerator]
+  [EmailNotifier]
 }
 
 database "PostgreSQL" as DB
@@ -59,4 +63,5 @@ cloud "Внешние сервисы" as EXT
 [SqlUserRepository] --> DB
 [ExcelReportGenerator] --> EXT
 [EmailNotifier] --> EXT
+
 @enduml
